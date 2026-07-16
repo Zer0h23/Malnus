@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tender Hunter</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero-card">
+        <div>
+          <p class="eyebrow">Tender discovery</p>
+          <h1>Find eligible ESA STAR &amp; EIC tenders for Malnus s.r.o.</h1>
+          <p class="intro">
+            This view covers ESA STAR (including Cassini-programme opportunities) and EIC Funding Opportunities (EIC and Horizon Europe calls), filtered for Malnus s.r.o. relevance in space, localization, geospatial, satellite, and related engineering or language services.
+          </p>
+          <p class="intro small-note">Profile focus: ESA STAR + EIC Funding Opportunities, EIC/Horizon/Cassini prioritized, with Malnus s.r.o. eligibility keywords applied.</p>
+          <button id="refresh-button" class="refresh-button" type="button">Refresh tenders</button>
+        </div>
+      </header>
+
+      <main class="panel-grid">
+        <section class="results-card full-width">
+          <div class="results-header">
+            <h2>Eligible matches</h2>
+            <span id="results-count">Ready</span>
+          </div>
+          <div id="status" class="status">Showing ESA STAR and EIC opportunities, filtered for Malnus s.r.o. eligibility.</div>
+          <ul id="results-list" class="results-list"></ul>
+          <div class="pager-row">
+            <button id="prev-page" type="button">Previous</button>
+            <span id="page-indicator">Page 1</span>
+            <button id="next-page" type="button">Next</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
