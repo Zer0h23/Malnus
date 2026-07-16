@@ -120,6 +120,7 @@ button {
 .results-list a:hover { text-decoration: underline; }
 .small-note { color: #b7d7fb; font-size: 13px; }
 .tender-description { margin-top: 6px; color: #9fc2ee; }
+.fit-summary { margin-top: 6px; color: #cfe3ff; font-style: italic; }
 @media (max-width: 780px) {
   .panel-grid { grid-template-columns: 1fr; }
   .filters { grid-template-columns: 1fr; }

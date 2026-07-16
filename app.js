@@ -23,13 +23,13 @@ function renderTenders(items) {
     li.className = 'tender-card';
     const fitScore = typeof item.fitScore === 'number' ? item.fitScore : null;
     const fitTier = fitScore === null ? '' : fitScore >= 70 ? 'fit-strong' : fitScore >= 45 ? 'fit-good' : fitScore >= 25 ? 'fit-possible' : 'fit-weak';
-    const fitTitle = item.fitReasons && item.fitReasons.length ? item.fitReasons.join(', ') : '';
 
     li.innerHTML = `
       <div class="tender-title-block">
         <div><a href="${item.url}" target="_blank" rel="noreferrer">${item.title}</a></div>
         <div class="small-note">${item.source}</div>
         ${item.description ? `<div class="small-note tender-description">${item.description}</div>` : ''}
+        ${item.fitSummary ? `<div class="small-note fit-summary">${item.fitSummary}</div>` : ''}
       </div>
       <div class="tender-meta-grid">
         <div class="meta-pill">
@@ -37,10 +37,18 @@ function renderTenders(items) {
           <strong>${item.category || 'Eligibility match'}</strong>
         </div>
         ${fitScore === null ? '' : `
-        <div class="meta-pill fit-pill ${fitTier}" title="${fitTitle}">
+        <div class="meta-pill fit-pill ${fitTier}">
           <span>Malnus s.r.o. fit</span>
           <strong>${fitScore}% &middot; ${item.fitLabel}</strong>
         </div>`}
+        <div class="meta-pill">
+          <span>Deadline</span>
+          <strong>${item.deadline || 'Not stated'}</strong>
+        </div>
+        <div class="meta-pill">
+          <span>Potential funding</span>
+          <strong>${item.fundingAmount || 'Not disclosed'}</strong>
+        </div>
       </div>
     `;
     resultsList.appendChild(li);

@@ -92,19 +92,97 @@ function enrichTender(item) {
 }
 
 const MALNUS_FIT_RULES = [
-  { pattern: /nato\s*diana|diana/, weight: 15, reason: 'NATO DIANA priority programme' },
-  { pattern: /eic|european innovation council/, weight: 15, reason: 'EIC priority programme' },
-  { pattern: /horizon( europe)?/, weight: 15, reason: 'Horizon Europe priority programme' },
-  { pattern: /cassini/, weight: 15, reason: 'Cassini priority programme' },
-  { pattern: /eudis/, weight: 15, reason: 'EUDIS priority programme' },
-  { pattern: /\bedf\b|european defence fund/, weight: 15, reason: 'EDF priority programme' },
-  { pattern: /localization|localisation|translation|language|linguistic/, weight: 20, reason: 'Localization / language services match' },
-  { pattern: /geospatial|mapping|cartography|\bgis\b|earth observation/, weight: 15, reason: 'Geospatial / mapping match' },
-  { pattern: /space|satellite|orbital|payload/, weight: 15, reason: 'Space / satellite domain match' },
-  { pattern: /defence|defense|security/, weight: 10, reason: 'Defence / security relevance' },
-  { pattern: /engineering|software|technical service/, weight: 10, reason: 'Technical / engineering services match' },
-  { pattern: /esa/, weight: 10, reason: 'ESA relevance' },
-  { pattern: /europe|\beu\b/, weight: 5, reason: 'General EU relevance' },
+  {
+    pattern: /nato\s*diana|diana/,
+    weight: 15,
+    reason: 'NATO DIANA priority programme',
+    explanation:
+      "It sits under NATO DIANA, the transatlantic dual-use accelerator that is one of Malnus's explicitly named target programmes, so the funding route itself is already a strategic fit, not just the subject matter.",
+  },
+  {
+    pattern: /eic|european innovation council/,
+    weight: 15,
+    reason: 'EIC priority programme',
+    explanation:
+      "It runs through the European Innovation Council, which Malnus tracks as a core funding channel for scaling deep-tech and dual-use innovation, so simply being an EIC call raises its relevance regardless of topic.",
+  },
+  {
+    pattern: /horizon( europe)?/,
+    weight: 15,
+    reason: 'Horizon Europe priority programme',
+    explanation:
+      "It's funded under Horizon Europe, the EU's flagship R&I programme and one of the funding sources Malnus actively monitors, which means the application process and eligibility rules are ones the team already understands.",
+  },
+  {
+    pattern: /cassini/,
+    weight: 15,
+    reason: 'Cassini priority programme',
+    explanation:
+      "It falls under the Cassini initiative for space downstream and NewSpace ventures, a named priority programme for Malnus, so it directly targets the segment of the space economy the company is positioned in.",
+  },
+  {
+    pattern: /eudis/,
+    weight: 15,
+    reason: 'EUDIS priority programme',
+    explanation:
+      "It's issued through EUDIS, the European Defence Innovation Scheme, matching Malnus's interest in EU-backed defence-innovation funding specifically (as opposed to general research funding).",
+  },
+  {
+    pattern: /\bedf\b|european defence fund/,
+    weight: 15,
+    reason: 'EDF priority programme',
+    explanation:
+      "It's funded by the European Defence Fund, which aligns with Malnus's interest in EU defence-technology funding and typically comes with fewer commercial-market competitors than open Horizon Europe calls.",
+  },
+  {
+    pattern: /localization|localisation|translation|language|linguistic/,
+    weight: 20,
+    reason: 'Localization / language services match',
+    explanation:
+      "The scope explicitly calls for localization, translation, or language services — this is Malnus's own service line, so the company wouldn't just be eligible to bid, it would likely be delivering exactly what it already sells.",
+  },
+  {
+    pattern: /geospatial|mapping|cartography|\bgis\b|earth observation/,
+    weight: 15,
+    reason: 'Geospatial / mapping match',
+    explanation:
+      "It involves geospatial data, mapping, or earth-observation work, which lines up with Malnus's GIS capabilities and means existing tooling and expertise could carry directly into the proposal.",
+  },
+  {
+    pattern: /space|satellite|orbital|payload/,
+    weight: 15,
+    reason: 'Space / satellite domain match',
+    explanation:
+      "It's a space or satellite-systems opportunity, squarely inside Malnus's aerospace engineering focus rather than an adjacent or general-purpose technical field.",
+  },
+  {
+    pattern: /defence|defense|security/,
+    weight: 10,
+    reason: 'Defence / security relevance',
+    explanation:
+      "It has a defence or security angle, relevant if Malnus wants to lean further into dual-use / defence-oriented contracts rather than purely civilian ones.",
+  },
+  {
+    pattern: /engineering|software|technical service/,
+    weight: 10,
+    reason: 'Technical / engineering services match',
+    explanation:
+      "It requires engineering or software/technical services delivery, which is a general capability match even where the specific domain isn't Malnus's narrowest niche.",
+  },
+  {
+    pattern: /esa/,
+    weight: 10,
+    reason: 'ESA relevance',
+    explanation:
+      "It's issued via ESA — a procurement channel Malnus already actively tracks — so the buyer relationship and bidding process are familiar rather than a cold start.",
+  },
+  {
+    pattern: /europe|\beu\b/,
+    weight: 5,
+    reason: 'General EU relevance',
+    explanation:
+      "It's a broader EU-funded opportunity, which mainly extends eligibility rather than indicating a strong thematic match on its own.",
+  },
 ];
 
 function computeMalnusFitScore(item) {
@@ -112,16 +190,16 @@ function computeMalnusFitScore(item) {
   const description = String(item.description || '').toLowerCase();
   const combined = `${title} ${description}`;
   let score = 0;
-  const matchedReasons = [];
+  const matchedRules = [];
 
   for (const rule of MALNUS_FIT_RULES) {
     if (rule.pattern.test(combined)) {
       score += rule.weight;
-      matchedReasons.push(rule.reason);
+      matchedRules.push(rule);
     }
   }
 
-  return { fitScore: Math.min(100, score), fitReasons: matchedReasons };
+  return { fitScore: Math.min(100, score), matchedRules };
 }
 
 function fitLabelForScore(score) {
@@ -131,14 +209,98 @@ function fitLabelForScore(score) {
   return 'Weak fit';
 }
 
+function buildFitSummary(item, fitScore, label, matchedRules) {
+  if (!matchedRules.length) {
+    return "No strong overlap detected with Malnus s.r.o.'s core focus areas (space, satellite, geospatial, localization, ESA/EU programmes). It only surfaced because it cleared the general eligibility keyword filter, so treat it as a long shot worth a manual skim rather than a targeted match.";
+  }
+
+  const ranked = [...matchedRules].sort((a, b) => b.weight - a.weight);
+  const primary = ranked.slice(0, 3);
+  const rest = ranked.slice(3);
+
+  const openers = {
+    'Strong fit': `This is a strong match (${fitScore}%) for Malnus s.r.o.`,
+    'Good fit': `This is a good match (${fitScore}%) for Malnus s.r.o.`,
+    'Possible fit': `This is a possible match (${fitScore}%) for Malnus s.r.o.`,
+    'Weak fit': `This is only a weak match (${fitScore}%) for Malnus s.r.o.`,
+  };
+
+  const sentences = [openers[label] || `Fit score: ${fitScore}%.`, ...primary.map((rule) => rule.explanation)];
+
+  if (rest.length) {
+    sentences.push(`It also touches on ${rest.map((rule) => rule.reason.replace(/ priority programme$/, '').toLowerCase()).join(', ')}, which nudges the score up further without being the main driver.`);
+  }
+
+  const extras = [];
+  if (item.fundingAmount) extras.push(`the indicative funding is ${item.fundingAmount}`);
+  if (item.deadline) extras.push(`the deadline is ${item.deadline}`);
+  if (extras.length) {
+    sentences.push(`Worth noting: ${extras.join(', and ')}.`);
+  }
+
+  return sentences.join(' ');
+}
+
 function boostPriorityPrograms(listings) {
   return listings
     .map((item) => {
-      const { fitScore, fitReasons } = computeMalnusFitScore(item);
-      return { ...item, fitScore, fitLabel: fitLabelForScore(fitScore), fitReasons };
+      const { fitScore, matchedRules } = computeMalnusFitScore(item);
+      const fitLabel = fitLabelForScore(fitScore);
+      const fitReasons = matchedRules.map((rule) => rule.reason);
+      return {
+        ...item,
+        fitScore,
+        fitLabel,
+        fitReasons,
+        fitSummary: buildFitSummary(item, fitScore, fitLabel, matchedRules),
+      };
     })
     .sort((a, b) => b.fitScore - a.fitScore)
     .map(enrichTender);
+}
+
+function pickNextDeadlineIso(isoDates = []) {
+  const valid = [...new Set(isoDates.filter(Boolean))].sort();
+  if (!valid.length) return null;
+  const today = new Date().toISOString().slice(0, 10);
+  return valid.find((date) => date >= today) || valid[valid.length - 1];
+}
+
+function parseDdMmYyyy(raw = '') {
+  const match = String(raw).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!match) return null;
+  const [, dd, mm, yyyy] = match;
+  return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+}
+
+function extractDottedDates(text = '') {
+  const matches = text.match(/\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/g) || [];
+  return matches.map((raw) => {
+    const [d, mo, y] = raw.split('.');
+    return `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  });
+}
+
+function extractEuroAmounts(text = '') {
+  const matches = text.match(/€\s?[\d.,]+\s*(?:thousand|million|billion)?/gi) || [];
+  return [...new Set(matches.map((m) => m.replace(/\s+/g, ' ').trim()))];
+}
+
+function formatEurAmount(value) {
+  if (!Number.isFinite(value)) return '';
+  if (value >= 1_000_000) {
+    const millions = value / 1_000_000;
+    return `€${millions % 1 === 0 ? millions.toFixed(0) : millions.toFixed(1)}M`;
+  }
+  if (value >= 1_000) return `€${Math.round(value / 1_000)}K`;
+  return `€${value}`;
+}
+
+function formatEurRange(min, max) {
+  if (min && max && min !== max) return `${formatEurAmount(min)} – ${formatEurAmount(max)} per grant`;
+  if (max) return `up to ${formatEurAmount(max)} per grant`;
+  if (min) return `from ${formatEurAmount(min)} per grant`;
+  return '';
 }
 
 function matchesKeyword(title = '', query = '') {
@@ -234,13 +396,23 @@ function extractRenderedEsaTenderLinks(keyword = '') {
           }
 
           seen.add(key);
-          items.push({ title: text, url: href, source: 'ESA STAR' });
+
+          const card = anchor.closest('.card-body');
+          const rightColText = card ? card.querySelector('.col-right')?.innerText || '' : '';
+          const closingMatch = rightColText.match(/Closing Date:\s*([\d/]+)/);
+
+          items.push({ title: text, url: href, source: 'ESA STAR', closingDateRaw: closingMatch ? closingMatch[1] : '' });
         });
 
         return items;
       });
 
-      resolve(listings.slice(0, 25));
+      resolve(
+        listings.slice(0, 25).map(({ closingDateRaw, ...item }) => ({
+          ...item,
+          deadline: parseDdMmYyyy(closingDateRaw),
+        }))
+      );
     } catch (error) {
       reject(error);
     } finally {
@@ -312,12 +484,16 @@ async function extractEicListings() {
     if (seen.has(key)) return;
     seen.add(key);
 
+    const euroAmounts = extractEuroAmounts(cleanDescription);
+
     items.push({
       title: cleanTitle,
       url: absoluteUrl,
       source: 'EIC Funding Opportunities',
       description: cleanDescription,
       priorityLabel: eicPriorityLabel(cleanTitle, cleanDescription),
+      deadline: pickNextDeadlineIso(extractDottedDates(cleanDescription)),
+      fundingAmount: euroAmounts.length ? euroAmounts.join(', ') : '',
     });
   };
 
@@ -392,6 +568,7 @@ function buildEuPortalRequestBody(boundary) {
     'deadlineModel',
     'frameworkProgramme',
     'typesOfAction',
+    'budgetOverview',
   ]);
 
   const parts = [
@@ -408,6 +585,28 @@ function buildEuPortalRequestBody(boundary) {
       )
       .join('') + `--${boundary}--\r\n`
   );
+}
+
+function findBudgetEntryForIdentifier(budgetOverviewRaw, identifier) {
+  if (!budgetOverviewRaw || !identifier) return null;
+
+  let parsed;
+  try {
+    parsed = JSON.parse(budgetOverviewRaw);
+  } catch (error) {
+    return null;
+  }
+
+  const actionMap = parsed.budgetTopicActionMap || {};
+  for (const entries of Object.values(actionMap)) {
+    for (const entry of entries) {
+      if (String(entry.action || '').startsWith(identifier)) {
+        return entry;
+      }
+    }
+  }
+
+  return null;
 }
 
 async function fetchEuPortalCalls(query, limit = 20) {
@@ -444,8 +643,15 @@ async function fetchEuPortalCalls(query, limit = 20) {
       const title = safeText(metadata.title?.[0] || result.summary || '');
       const status = metadata.status?.[0] === EU_PORTAL_STATUS_OPEN ? 'Open' : 'Forthcoming';
       const deadlineRaw = metadata.deadlineDate?.[0];
-      const deadline = deadlineRaw ? new Date(deadlineRaw).toISOString().slice(0, 10) : '';
+      const deadline = deadlineRaw ? new Date(deadlineRaw).toISOString().slice(0, 10) : null;
       const priorityLabel = euPortalProgrammeLabel(identifier, title);
+
+      const budgetEntry = findBudgetEntryForIdentifier(metadata.budgetOverview?.[0], identifier);
+      const fundingAmount = budgetEntry
+        ? `${formatEurRange(budgetEntry.minContribution, budgetEntry.maxContribution)}${
+            budgetEntry.expectedGrants ? ` (~${budgetEntry.expectedGrants} grant${budgetEntry.expectedGrants === 1 ? '' : 's'} expected)` : ''
+          }`
+        : '';
 
       if (!title || !result.url) return null;
 
@@ -454,6 +660,8 @@ async function fetchEuPortalCalls(query, limit = 20) {
         url: result.url,
         source: 'EU Funding & Tenders Portal',
         description: `Status: ${status}.${deadline ? ` Deadline: ${deadline}.` : ''}`,
+        deadline,
+        fundingAmount,
         ...(priorityLabel ? { priorityLabel } : {}),
       };
     })
