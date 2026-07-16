@@ -4,7 +4,8 @@
   "private": true,
   "description": "A lightweight tender discovery website MVP.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "npx playwright install --with-deps chromium"
   },
   "dependencies": {
     "playwright": "^1.61.1"
